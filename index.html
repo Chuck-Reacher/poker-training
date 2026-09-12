@@ -334,7 +334,9 @@ const MODULES = [
   {key:'bluff', emoji:'🎭', title:'Le bluff', desc:'Reconnaître les bons spots pour bluffer'},
   {key:'showdown', emoji:'🏆', title:'Qui gagne ?', desc:'Compare deux mains à l\'abattage'},
   {key:'potodds', emoji:'📐', title:'Cotes & équité', desc:'Calcule si un call est rentable'},
+  {key:'tiers', emoji:'📶', title:'Force des mains', desc:'Haut, milieu ou bas de panier pour tes 2 cartes'},
 ];
+function tierOf(score){ return score>=9?'Haut':score>=6?'Milieu':'Bas'; }
 
 /* ===================== STATE ===================== */
 let profile = null;
@@ -390,6 +392,7 @@ function goGlossary(){ view='glossary'; renderGlossary(); }
 
 function startModule(key){
   if(key==='range'){ view='range'; startRange(); return; }
+  if(key==='tiers'){ view='tiers'; renderTiers(); return; }
   let questions, title;
   const n = 10;
   if(key==='preflop'){ questions = generatePreflopQuestions(n); title='Mains de départ'; }
@@ -593,6 +596,31 @@ function renderRange(){
          <div class="btn-row"><button class="btn btn-ghost" onclick="goHome()">Accueil</button><button class="btn btn-primary" onclick="startRange()">Nouvelle position</button></div>`
       : `<button class="btn btn-primary" onclick="submitRange()">Valider ma range</button>`
     }
+  `;
+}
+
+/* ===================== RENDER: FORCE DES MAINS ===================== */
+function renderTiers(){
+  const app = document.getElementById('app');
+  const gridHtml = RANKS.map((r1,i) => RANKS.map((r2,j) => {
+    let label, isPair=false;
+    if(i===j){ label=r1+r2; isPair=true; } else if(i<j){ label=r1+r2+'s'; } else { label=r2+r1+'o'; }
+    const h = ALL_HANDS.find(x=>x.label===label);
+    const tier = tierOf(h.score);
+    const cls = 'range-cell'+(isPair?' pair':'')+(tier==='Haut'?' correct-yes':tier==='Bas'?' wrong-exclude':'');
+    return `<div class="${cls}">${label}</div>`;
+  }).join('')).join('');
+  app.innerHTML = `
+    <button class="back" onclick="goHome()">‹ Retour</button>
+    <h1>Force des mains</h1>
+    <p class="tagline" style="margin-bottom:16px;">Pour tes deux cartes de départ, où se situe ta main dans le panier de toutes les mains possibles ?</p>
+    <div class="range-grid">${gridHtml}</div>
+    <div class="explain-box">
+      <b>🟢 Vert = Haut de panier</b> (top ~15%) : jouable presque partout.<br>
+      <span style="color:var(--chalk);">Neutre = Milieu de panier</span> : jouable en bonne position ou en relance.<br>
+      <b style="color:var(--danger);">Contour rouge = Bas de panier</b> : à coucher dans la plupart des situations.
+    </div>
+    <p class="dim" style="font-size:0.8rem;margin-top:10px;">Basé sur une méthode simplifiée (score de Chen), pas un solveur exact.</p>
   `;
 }
 
