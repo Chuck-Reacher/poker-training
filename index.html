@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Poker Training</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#071f16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Poker Training">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#071f16; --surface:#0e2e21; --surface-2:#153f2c; --line:#1f5c3f;
+    --chalk:#f4ecd8; --chalk-dim:#8fae9c; --accent:#d4af37; --accent-ink:#241b04;
+    --danger:#c0392b; --ok:#3fae66;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--chalk);font-family:'Inter',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;}
+  #app{max-width:560px;margin:0 auto;padding:24px 18px 70px;min-height:100vh;}
+  h1,h2,h3{font-family:'Playfair Display',serif;margin:0;line-height:1.1;font-weight:800;}
+  h1{font-size:clamp(1.8rem,7vw,2.4rem);}
+  p{margin:0;line-height:1.5;}
+  .dim{color:var(--chalk-dim);}
+  .tagline{color:var(--chalk-dim);font-size:0.9rem;margin-top:6px;}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:10px;}
+  .header .kicker{color:var(--accent);font-weight:700;font-size:0.78rem;letter-spacing:0.03em;margin-bottom:4px;text-transform:uppercase;}
+  .icon-btn{background:var(--surface);border:1px solid var(--line);border-radius:8px;width:40px;height:40px;
+    display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--chalk);cursor:pointer;flex-shrink:0;}
+  .back{color:var(--chalk-dim);font-size:0.9rem;font-weight:600;background:none;border:none;cursor:pointer;
+    padding:0 0 18px 0;display:flex;align-items:center;gap:6px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;
+    font-family:'Inter',sans-serif;font-weight:700;font-size:1rem;padding:15px 22px;cursor:pointer;width:100%;}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-ghost{background:transparent;color:var(--chalk);border:1px solid var(--line);}
+  .btn-row{display:flex;gap:10px;margin-top:20px;}
+  .btn-row .btn{width:auto;flex:1;}
+  .stats-card{display:flex;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px;}
+  .stats-card .stat-block{flex:1;text-align:center;}
+  .stats-card .flame{font-size:1.3rem;font-weight:800;}
+  .stats-card .points{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--accent);}
+  .stats-card .stat-sub{font-size:0.7rem;color:var(--chalk-dim);margin-top:2px;}
+  .module-grid{display:flex;flex-direction:column;gap:10px;}
+  .module-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+    display:flex;align-items:center;gap:14px;cursor:pointer;}
+  .module-card .emoji{font-size:1.6rem;flex-shrink:0;}
+  .module-card .txt h3{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;margin-bottom:3px;}
+  .module-card .txt p{font-size:0.82rem;color:var(--chalk-dim);}
+  .section-title{font-size:0.78rem;color:var(--chalk-dim);font-weight:700;margin:22px 0 10px;text-transform:uppercase;letter-spacing:0.03em;}
+  .card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+    width:52px;height:72px;border-radius:8px;background:var(--chalk);color:#111;
+    font-weight:800;font-size:1.3rem;box-shadow:0 2px 0 rgba(0,0,0,0.3);margin:0 4px;}
+  .card.red{color:var(--danger);}
+  .card .suit{font-size:1.4rem;line-height:1;}
+  .cards-row{display:flex;justify-content:center;margin:18px 0;flex-wrap:wrap;gap:2px;}
+  .cards-row.small .card{width:40px;height:56px;font-size:1rem;}
+  .vs-block{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0;}
+  .vs-label{font-family:'Playfair Display',serif;color:var(--accent);font-size:1.1rem;}
+  .quiz-context{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px;font-size:0.95rem;font-weight:600;text-align:center;}
+  .quiz-progress{font-size:0.8rem;color:var(--chalk-dim);margin-bottom:14px;text-align:center;}
+  .option-btn{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    color:var(--chalk);padding:16px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;text-align:center;}
+  .option-btn.correct{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .option-btn.incorrect{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .option-btn.dimmed{opacity:0.4;}
+  .explain-box{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0;font-size:0.88rem;}
+  .explain-box b{color:var(--accent);}
+  .range-grid{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;margin:16px 0;}
+  .range-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:0.58rem;font-weight:700;border-radius:3px;background:var(--surface);border:1px solid var(--line);
+    color:var(--chalk-dim);cursor:pointer;}
+  .range-cell.picked{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);}
+  .range-cell.pair{background:var(--surface-2);}
+  .range-cell.correct-yes{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .range-cell.wrong-include{background:var(--danger);color:#fff;border-color:var(--danger);}
+  .range-cell.wrong-exclude{border-color:var(--danger);color:var(--danger);}
+  .glossary-row{padding:14px 0;border-bottom:1px solid var(--line);}
+  .glossary-row:last-child{border-bottom:none;}
+  .glossary-row .term{font-weight:800;color:var(--accent);margin-bottom:3px;}
+  .glossary-row .def{font-size:0.88rem;color:var(--chalk-dim);}
+  .history-summary{display:flex;gap:10px;margin-bottom:20px;}
+  .history-summary .stat{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 8px;text-align:center;}
+  .history-summary .stat .n{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--accent);}
+  .history-summary .stat .l{font-size:0.66rem;color:var(--chalk-dim);margin-top:2px;}
+  .log-row{display:flex;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:7px;font-size:0.86rem;}
+  .log-row .pts{color:var(--accent);font-family:'Playfair Display',serif;font-size:1.05rem;}
+  .day-heading{font-size:0.76rem;font-weight:700;color:var(--chalk-dim);margin:16px 0 8px;text-transform:uppercase;}
+  .empty-history{color:var(--chalk-dim);text-align:center;padding:40px 0;font-size:0.9rem;}
+  .result-wrap{text-align:center;padding:30px 0;}
+  .result-wrap .big{font-family:'Playfair Display',serif;font-size:3rem;color:var(--accent);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ===================== DECK / CARD HELPERS ===================== */
+const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+const VAL = {A:14,K:13,Q:12,J:11,T:10,9:9,8:8,7:7,6:6,5:5,4:4,3:3,2:2};
+const SUITS = ['s','h','d','c'];
+const SUIT_SYMBOL = {s:'♠',h:'♥',d:'♦',c:'♣'};
+const SUIT_RED = {h:true,d:true,s:false,c:false};
+
+function cardHtml(rank, suit){
+  const red = SUIT_RED[suit];
+  return `<div class="card ${red?'red':''}">${rank}<span class="suit">${SUIT_SYMBOL[suit]}</span></div>`;
+}
+function cardsRowHtml(cards, small){
+  return `<div class="cards-row ${small?'small':''}">${cards.map(c=>cardHtml(c[0],c[1])).join('')}</div>`;
+}
+function randomDistinctSuits(n){
+  const pool = SUITS.slice(); const out=[];
+  for(let i=0;i<n;i++){ const idx=Math.floor(Math.random()*pool.length); out.push(pool.splice(idx,1)[0]); }
+  return out;
+}
+
+/* ===================== CHEN SCORE (force de main simplifiée, pas un solver) ===================== */
+function chenScore(r1, r2, suited){
+  let base;
+  if(r1 === r2){ base = Math.max(VAL[r1]*2, 5); }
+  else {
+    const hi = VAL[r1] >= VAL[r2] ? r1 : r2;
+    const lo = VAL[r1] >= VAL[r2] ? r2 : r1;
+    const pts = {A:10,K:8,Q:7,J:6,T:5};
+    base = pts[hi] !== undefined ? pts[hi] : VAL[hi]/2;
+    if(suited) base += 2;
+    const gap = VAL[hi] - VAL[lo] - 1;
+    if(gap === 1) base -= 1;
+    else if(gap === 2) base -= 2;
+    else if(gap === 3) base -= 4;
+    else if(gap >= 4) base -= 5;
+    if(gap <= 1 && VAL[hi] < VAL['Q']) base += 1;
+  }
+  return base;
+}
+const ALL_HANDS = [];
+for(let i=0;i<13;i++) for(let j=0;j<13;j++){
+  const r1=RANKS[i], r2=RANKS[j];
+  if(i===j) ALL_HANDS.push({r1,r2,suited:false,pair:true,label:r1+r2,score:chenScore(r1,r2,false)});
+  else if(i<j) ALL_HANDS.push({r1,r2,suited:true,pair:false,label:r1+r2+'s',score:chenScore(r1,r2,true)});
+}
+for(let i=0;i<13;i++) for(let j=0;j<13;j++){
+  if(i<j) ALL_HANDS.push({r1:RANKS[i],r2:RANKS[j],suited:false,pair:false,label:RANKS[i]+RANKS[j]+'o',score:chenScore(RANKS[i],RANKS[j],false)});
+}
+
+/* ===================== POSITIONS & RANGES (guide simplifié) ===================== */
+const POSITIONS = ['UTG','MP','CO','BTN','SB'];
+const POSITION_NAMES = {UTG:'Premier à parler (UTG)', MP:'Position médiane (MP)', CO:'Cut-off (CO)', BTN:'Bouton (BTN)', SB:'Petite blinde (SB)', BB:'Grosse blinde (BB)'};
+const OPEN_THRESHOLD = {UTG:8, MP:7, CO:6, SB:5, BTN:4.5};
+const ACT_ORDER = ['UTG','MP','CO','BTN','SB','BB'];
+
+function randomHandInstance(){
+  const h = ALL_HANDS[Math.floor(Math.random()*ALL_HANDS.length)];
+  let suits;
+  if(h.pair) suits = randomDistinctSuits(2);
+  else if(h.suited){ const s = SUITS[Math.floor(Math.random()*4)]; suits=[s,s]; }
+  else { suits = randomDistinctSuits(2); }
+  return { hand:h, cards:[[h.r1,suits[0]],[h.r2,suits[1]]] };
+}
+
+/* ===================== MODULE : MAINS DE DÉPART ===================== */
+function generatePreflopQuestions(n){
+  const qs = [];
+  for(let i=0;i<n;i++){
+    const facingRaise = Math.random() < 0.5;
+    let heroPos, raiserPos = null;
+    if(facingRaise){
+      const idx = 1 + Math.floor(Math.random()*(ACT_ORDER.length-1));
+      heroPos = ACT_ORDER[idx];
+      raiserPos = ACT_ORDER[Math.floor(Math.random()*idx)];
+    } else {
+      heroPos = POSITIONS[Math.floor(Math.random()*POSITIONS.length)];
+    }
+    const {hand, cards} = randomHandInstance();
+    let correct, context;
+    if(facingRaise){
+      const openThresh = raiserPos === 'BB' ? 3 : OPEN_THRESHOLD[raiserPos];
+      if(hand.score >= openThresh + 6) correct = 'Relancer (3-bet)';
+      else if(hand.score >= openThresh + 2) correct = 'Suivre (Call)';
+      else correct = 'Se coucher (Fold)';
+      context = `${POSITION_NAMES[raiserPos]} a relancé. Tu es en ${POSITION_NAMES[heroPos]}. Que fais-tu ?`;
+    } else {
+      correct = hand.score >= OPEN_THRESHOLD[heroPos] ? 'Relancer (Raise)' : 'Se coucher (Fold)';
+      context = `Personne n'a encore parlé. Tu es en ${POSITION_NAMES[heroPos]}. Que fais-tu ?`;
+    }
+    const allOptions = facingRaise ? ['Se coucher (Fold)','Suivre (Call)','Relancer (3-bet)'] : ['Se coucher (Fold)','Relancer (Raise)'];
+    qs.push({
+      cards, context, options: allOptions, correct,
+      explain: `Force de main estimée : ${hand.score.toFixed(1)}/20 (méthode simplifiée, pas un solver). ` +
+        (facingRaise
+          ? `Face à une ouverture ${POSITION_NAMES[raiserPos]}, on continue avec des mains plus fortes qu'en ouverture, et on ne 3-bet qu'avec le haut du panier.`
+          : `En ${POSITION_NAMES[heroPos]}, la range d'ouverture d'un débutant tourne autour du top ${Math.round((ALL_HANDS.filter(h=>h.score>=OPEN_THRESHOLD[heroPos]).length/169)*100)}% des mains.`)
+    });
+  }
+  return qs;
+}
+
+/* ===================== MODULE : COTES DU POT & EQUITY ===================== */
+function generatePotOddsQuestions(n){
+  const qs = [];
+  for(let i=0;i<n;i++){
+    if(Math.random() < 0.5){
+      const potBefore = (2+Math.floor(Math.random()*18))*10;
+      const bet = (1+Math.floor(Math.random()*12))*5;
+      const needed = Math.round((bet/(potBefore+2*bet))*100);
+      const opts = new Set([needed]);
+      while(opts.size<4){ opts.add(Math.max(3,Math.min(80, needed + (Math.floor(Math.random()*30)-15)))); }
+      qs.push({
+        cards:null,
+        context:`Il y a ${potBefore}€ dans le pot (mise adverse déjà incluse). Il te faut ${bet}€ pour suivre. Quelle équité minimum te faut-il ?`,
+        options: Array.from(opts).sort((a,b)=>a-b).map(v=>v+'%'), correct: needed+'%',
+        explain:`Équité nécessaire = mise à payer ÷ (pot + 2×mise) = ${bet} ÷ (${potBefore}+${2*bet}) ≈ ${needed}%. Au-delà, suivre est rentable sur la durée.`
+      });
+    } else {
+      const outs = 2+Math.floor(Math.random()*13);
+      const isFlop = Math.random()<0.5;
+      const street = isFlop ? 'flop (2 cartes à venir)' : 'turn (1 carte à venir)';
+      const mult = isFlop ? 4 : 2;
+      const equity = Math.min(95, outs*mult);
+      const opts = new Set([equity]);
+      while(opts.size<4){ opts.add(Math.max(2,Math.min(95, equity+(Math.floor(Math.random()*30)-15)))); }
+      qs.push({
+        cards:null,
+        context:`Tu as ${outs} outs, tu es au ${street}. Environ quelle équité as-tu (règle du 4 et du 2) ?`,
+        options: Array.from(opts).sort((a,b)=>a-b).map(v=>v+'%'), correct: equity+'%',
+        explain:`Règle du 4 et du 2 : outs × 4 s'il reste deux cartes, × 2 s'il n'en reste qu'une. Ici : ${outs} × ${mult} = ${equity}%.`
+      });
+    }
+  }
+  return qs;
+}
+
+/* ===================== BANQUE : POST-FLOP ===================== */
+const POSTFLOP_BANK = [
+  {board:[['A','s'],['7','d'],['2','c']], hand:[['A','h'],['K','h']], ctx:"Board sec, l'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Top pair top kicker sur board sec : value bet pour protéger et faire payer les mains plus faibles."},
+  {board:[['J','c'],['T','c'],['9','c']], hand:[['A','s'],['A','d']], ctx:"Board tout trèfle (couleur possible). L'adversaire mise gros.", options:['Se coucher','Suivre','Relancer'], correct:'Suivre', explain:"Overpair encore forte mais board très dangereux : on suit prudemment plutôt que de sur-engager ou fold trop vite."},
+  {board:[['8','d'],['4','s'],['2','h']], hand:[['K','c'],['K','d']], ctx:"Board bas et sec, l'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Overpair sur board bas et non coordonné : c-bet standard pour valoriser et protéger."},
+  {board:[['Q','h'],['J','d'],['8','s']], hand:[['9','c'],['8','c']], ctx:"Paire de 8 + tirage quinte faible. L'adversaire mise le pot.", options:['Se coucher','Suivre','Relancer'], correct:'Se coucher', explain:"Main trop faible avec un tirage limité face à une mise pleine pot : pas assez de cotes pour continuer."},
+  {board:[['5','s'],['6','s'],['7','d']], hand:[['8','s'],['9','s']], ctx:"Quinte faite (5-6-7-8-9). L'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Quinte faite sur un board qui peut devenir dangereux au prochain tour : il faut valoriser maintenant."},
+  {board:[['K','d'],['K','s'],['2','c']], hand:[['A','c'],['Q','c']], ctx:"Board pairé. L'adversaire (joueur agressif) mise gros.", options:['Se coucher','Suivre'], correct:'Se coucher', explain:"Ace-high sans paire ni tirage face à une grosse mise sur un board pairé : main trop faible pour continuer."},
+  {board:[['9','h'],['8','h'],['2','s']], hand:[['T','h'],['J','h']], ctx:"Tirage couleur + tirage quinte (combo draw). L'adversaire mise demi-pot.", options:['Se coucher','Suivre','Relancer'], correct:'Relancer', explain:"Un combo draw a énormément d'équité : relancer en semi-bluff est souvent la meilleure ligne."},
+  {board:[['4','c'],['4','d'],['9','s'],['K','c'],['2','h']], hand:[['K','s'],['Q','d']], ctx:"Rivière. Paire de rois (top pair). L'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Ta paire de rois bat beaucoup de mains qui ont pu checker jusqu'ici : value bet raisonnable."},
+  {board:[['A','s'],['K','d'],['Q','c']], hand:[['J','s'],['T','s']], ctx:"Board très coordonné et haut. Tu as la meilleure quinte possible. L'adversaire mise le pot.", options:['Se coucher','Suivre','Relancer'], correct:'Relancer', explain:"Tu as la nut straight (la meilleure quinte possible) : il faut value-relancer pour construire le pot."},
+  {board:[['7','c'],['7','d'],['2','s']], hand:[['A','c'],['A','d']], ctx:"L'adversaire fait une petite mise (donk-bet).", options:['Se coucher','Suivre','Relancer'], correct:'Relancer', explain:"Petite mise adverse + overpair très forte : il faut faire payer et construire le pot, ton adversaire a rarement un 7."},
+  {board:[['6','d'],['7','d'],['8','d']], hand:[['A','d'],['2','d']], ctx:"Board tout carreau. Tu as la couleur maximale (nut flush). L'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Tu as la meilleure couleur possible : value bet pour construire le pot pendant que tu es devant."},
+  {board:[['T','s'],['T','h'],['5','c'],['5','d']], hand:[['A','s'],['K','s']], ctx:"Board doublement pairé (dangereux). L'adversaire mise gros.", options:['Se coucher','Suivre'], correct:'Se coucher', explain:"Aucune paire sur un board déjà dangereux (full possible) : rien ne justifie de continuer."},
+  {board:[['9','c'],['6','s'],['3','d']], hand:[['6','c'],['6','d']], ctx:"Tu as un brelan caché (le 6 s'apparie avec le board). L'adversaire check.", options:['Check','Bet'], correct:'Bet', explain:"Brelan caché très fort et difficile à lire pour l'adversaire : value bet pour en tirer le maximum."},
+  {board:[['K','h'],['Q','h'],['J','h']], hand:[['A','c'],['K','c']], ctx:"Board tout cœur, quinte et couleur possibles. Top pair top kicker. L'adversaire mise le pot.", options:['Se coucher','Suivre'], correct:'Se coucher', explain:"Board extrêmement dangereux (couleur ET quinte possibles) : même top pair top kicker devient trop fragile."},
+  {board:[['A','h'],['5','c'],['2','d']], hand:[['3','c'],['4','c']], ctx:"Tirage quinte ventral, board bas avec un As. L'adversaire fait une petite mise.", options:['Se coucher','Suivre'], correct:'Suivre', explain:"Petite mise adverse : les cotes du pot sont suffisantes pour continuer avec un tirage, même ventral."},
+  {board:[['2','s'],['7','h'],['9','c']], hand:[['A','d'],['A','s']], ctx:"Board bas et sec. Personne n'a encore misé.", options:['Check','Bet'], correct:'Bet', explain:"Paire d'As sur un board qui ne touche presque personne : c-bet standard pour valoriser."},
+];
+
+/* ===================== BANQUE : LE BLUFF ===================== */
+const BLUFF_BANK = [
+  {ctx:"Board sec K♠7♦2♣, tu es en position, l'adversaire check, tu n'as rien touché.", q:"Bon moment pour bluffer ?", options:['Oui','Non'], correct:'Oui', explain:"Board sec favorise le pré-relanceur : l'adversaire touche rarement ce board."},
+  {ctx:"Board très coordonné 9♥8♥7♠, 3 adversaires encore dans le coup, tu n'as rien.", q:"Bon moment pour bluffer ?", options:['Oui','Non'], correct:'Non', explain:"Board texturé + plusieurs adversaires = trop de mains touchent quelque chose."},
+  {ctx:"Ton adversaire ne se couche presque jamais (calling station).", q:"Bluffer contre ce type de joueur est...", options:['Une bonne idée','Une mauvaise idée'], correct:'Une mauvaise idée', explain:"Bluffer un joueur qui ne se couche jamais est inutile : value bet plutôt."},
+  {ctx:"Tu dois choisir : bluffer en dernier à parler (en position) ou en premier (hors position).", q:"Le bluff est généralement plus efficace...", options:['En position','Hors position'], correct:'En position', explain:"Être en position donne plus d'information et plus de contrôle sur la taille du pot."},
+  {ctx:"Un bon bluff a besoin de \"fold equity\".", q:"Que signifie ce terme ?", options:['La probabilité que l\'adversaire se couche','La probabilité de gagner au tapis','Le montant misé'], correct:'La probabilité que l\'adversaire se couche', explain:"Le fold equity est la valeur d'un bluff qui vient du fait que l'adversaire peut se coucher."},
+  {ctx:"Un pot est joué à 4 joueurs (multiway) au flop.", q:"Un bluff y est généralement...", options:['Plus rentable','Moins rentable'], correct:'Moins rentable', explain:"Plus il y a d'adversaires, plus il y a de chances que l'un d'eux ait touché le board."},
+  {ctx:"Pour ne pas être lisible, la taille d'un bluff par rapport à une value bet devrait être...", q:"Choisis la bonne pratique.", options:['Identique (équilibrée)','Toujours plus petite','Toujours plus grande'], correct:'Identique (équilibrée)', explain:"Utiliser les mêmes tailles pour value bets et bluffs empêche l'adversaire de deviner la force de ta main."},
+  {ctx:"Rivière, tu as raté ton tirage cœur, tu n'as que la carte la plus haute.", q:"Bon candidat pour un bluff rivière ?", options:['Oui','Non'], correct:'Oui', explain:"Sans aucune valeur d'abattage, miser ne te coûte rien en \"showdown value\" perdue."},
+  {ctx:"Un adversaire a été agressif à chaque tour, racontant une histoire cohérente de main forte.", q:"Se coucher une main moyenne face à cette pression est...", options:['Souvent justifié','Toujours une erreur'], correct:'Souvent justifié', explain:"Quand les actions racontent une histoire cohérente, il faut savoir respecter la force annoncée."},
+  {ctx:"Miser avec une main qui n'est pas la meilleure actuellement, mais qui a des outs pour s'améliorer.", q:"Comment appelle-t-on cette technique ?", options:['Semi-bluff','Bluff pur','Value bet'], correct:'Semi-bluff', explain:"Le semi-bluff combine deux façons de gagner : fold adverse, ou amélioration de ta main."},
+  {ctx:"Comparé à un bluff pur (main sans aucune chance de s'améliorer).", q:"Le semi-bluff est généralement...", options:['Plus sûr','Plus risqué','Pareil'], correct:'Plus sûr', explain:"Deux façons de gagner réduisent le risque par rapport à un bluff pur."},
+  {ctx:"Ton adversaire vient de perdre une grosse main et joue de façon désordonnée (\"tilt\").", q:"Bluffer ce joueur est...", options:['Une bonne idée','Risqué'], correct:'Risqué', explain:"Les joueurs sur tilt suivent souvent beaucoup plus que d'habitude."},
+  {ctx:"Tu es hors position (tu dois parler en premier) toute la main.", q:"Bluffer hors position est généralement...", options:['Plus facile','Plus difficile'], correct:'Plus difficile', explain:"Sans info sur la réaction adverse et avec un risque de relance derrière, c'est plus délicat."},
+  {ctx:"Tu as relancé preflop depuis le bouton, la grosse blinde suit. Flop bas et sec, elle check.", q:"Bon moment pour un c-bet bluff ?", options:['Oui','Non'], correct:'Oui', explain:"Ce board favorise ta range de relanceur, et elle check souvent avec des mains faibles ici."},
+  {ctx:"Tu détiens une carte qui réduit les combinaisons fortes possibles chez l'adversaire (ex: l'As de cœur sur un board très cœur).", q:"Ce concept s'appelle...", options:['Un blocker','Un donk-bet','Une range'], correct:'Un blocker', explain:"Un blocker rend ton bluff plus crédible en réduisant les mains fortes probables chez l'adversaire."},
+  {ctx:"Board bas, sec, non coordonné, un seul adversaire, tu es le relanceur preflop et en position.", q:"Profil de board globalement...", options:['Favorable pour bluffer (c-bet)','Jamais favorable'], correct:'Favorable pour bluffer (c-bet)', explain:"Board bas et sec : profil classique pour un c-bet en tant que pré-relanceur, peu importe ta main."},
+];
+
+/* ===================== BANQUE : QUI GAGNE ? (vérifié par évaluateur) ===================== */
+const SHOWDOWN_BANK = [
+  {board:[['A','s'],['K','d'],['9','c'],['4','h'],['2','s']], a:[['Q','s'],['J','s']], b:[['T','d'],['8','d']], winner:'A', explain:"Personne n'a de paire : A-K-Q-J-9 (A) bat A-K-T-9-8 (B). Le kicker (Q contre T) fait toute la différence."},
+  {board:[['K','h'],['K','d'],['7','s'],['4','c'],['2','h']], a:[['A','c'],['A','d']], b:[['Q','s'],['Q','c']], winner:'A', explain:"Deux paires grâce aux rois du board : As-Rois (A) bat Rois-Dames (B), la paire la plus haute décide en premier."},
+  {board:[['J','s'],['T','s'],['9','s'],['5','d'],['2','c']], a:[['Q','s'],['8','s']], b:[['A','s'],['K','d']], winner:'A', explain:"A complète une quinte flush (Q-J-T-9-8 à pique) ! B n'a qu'une main haute malgré une carte pique : la quinte flush écrase tout."},
+  {board:[['8','d'],['8','h'],['8','c'],['3','s'],['3','d']], a:[['K','c'],['2','h']], b:[['A','s'],['4','s']], winner:'Tie', explain:"Le board forme déjà un full (8-8-8-3-3) à lui seul : personne ne peut faire mieux, c'est un partage du pot (\"jouer le board\")."},
+  {board:[['6','s'],['5','s'],['4','s'],['3','h'],['2','d']], a:[['7','s'],['8','s']], b:[['A','d'],['A','c']], winner:'A', explain:"A complète une quinte flush 8-high à pique. B n'a qu'une simple quinte (via le board) malgré sa paire d'as."},
+  {board:[['K','h'],['J','h'],['2','c'],['6','s'],['9','d']], a:[['Q','c'],['T','d']], b:[['A','d'],['Q','d']], winner:'A', explain:"A complète une quinte Roi-haute (K-Q-J-T-9). B n'a qu'une main haute à l'As, sans quinte possible faute de dix utile."},
+  {board:[['4','c'],['4','d'],['9','s'],['K','h'],['K','d']], a:[['9','c'],['2','h']], b:[['A','s'],['5','s']], winner:'A', explain:"A forme deux paires Rois-Neuf (grâce à son second 9). B n'a que Rois-Quatre. La deuxième paire la plus haute décide : Neuf bat Quatre."},
+  {board:[['5','h'],['5','d'],['5','c'],['8','s'],['K','c']], a:[['K','d'],['K','s']], b:[['A','c'],['2','d']], winner:'A', explain:"A forme un full Rois par les Cinq (paire de rois + brelan du board). B n'a qu'un brelan de 5. Le full écrase le brelan."},
+  {board:[['2','s'],['7','h'],['9','c'],['J','d'],['Q','s']], a:[['A','h'],['T','h']], b:[['K','c'],['T','c']], winner:'B', explain:"B complète une quinte Roi-haute (K-Q-J-T-9). A n'a qu'une main haute à l'As, aucune quinte possible ici."},
+  {board:[['3','c'],['3','d'],['3','h'],['3','s'],['7','d']], a:[['A','s'],['K','d']], b:[['2','c'],['2','h']], winner:'A', explain:"Les 4 brelans sont sur le board : tout le monde joue carré de 3, le kicker décide. As (A) bat Deux (B)."},
+  {board:[['T','h'],['9','h'],['8','h'],['7','s'],['6','c']], a:[['5','h'],['4','h']], b:[['A','c'],['K','d']], winner:'A', explain:"A complète une couleur à cœur. B n'a qu'une quinte via le board (T-9-8-7-6). La couleur bat toujours la quinte simple."},
+  {board:[['A','c'],['A','d'],['A','h'],['A','s'],['5','c']], a:[['K','c'],['Q','c']], b:[['2','d'],['3','d']], winner:'A', explain:"Carré d'as des deux côtés (déjà sur le board) : le kicker décide. Roi (A) bat Trois (B)."},
+  {board:[['J','d'],['8','c'],['4','s'],['4','h'],['9','c']], a:[['A','s'],['4','d']], b:[['K','d'],['Q','h']], winner:'A', explain:"A forme un brelan de 4 (troisième 4). B n'a qu'une simple paire de 4 (via le board). Le brelan écrase la paire."},
+  {board:[['6','d'],['6','h'],['6','c'],['9','s'],['K','s']], a:[['9','h'],['9','d']], b:[['A','d'],['K','d']], winner:'A', explain:"A forme un full Neuf par les Six (paire de 9 + brelan du board). B n'a qu'une paire de rois. Le full gagne largement."},
+  {board:[['K','h'],['Q','h'],['J','h'],['T','h'],['2','c']], a:[['A','h'],['3','c']], b:[['9','d'],['8','d']], winner:'A', explain:"A complète une quinte flush royale (A-K-Q-J-T à cœur), la meilleure main possible au poker !"},
+  {board:[['Q','d'],['9','s'],['5','h'],['5','d'],['2','c']], a:[['Q','s'],['9','c']], b:[['A','c'],['5','c']], winner:'B', explain:"Attention au piège : B forme un brelan de 5 (troisième 5) qui bat les deux paires Dames-Neuf de A. Le brelan bat toujours deux paires."},
+];
+
+/* ===================== GLOSSAIRE ===================== */
+const GLOSSARY = [
+  {term:'VPIP', def:"Pourcentage de mains où un joueur met volontairement de l'argent dans le pot avant le flop. Indique à quel point il est \"large\" (loose) ou \"serré\" (tight)."},
+  {term:'PFR', def:"Pourcentage de mains relancées avant le flop (Pre-Flop Raise). Comparé au VPIP, il indique l'agressivité preflop d'un joueur."},
+  {term:'3-bet', def:"La deuxième relance d'un tour d'enchères (relance sur une relance). Souvent réservée aux mains fortes ou à quelques bluffs choisis."},
+  {term:'C-bet', def:"Continuation bet : miser sur le flop après avoir relancé preflop, que la main se soit améliorée ou non."},
+  {term:'GTO', def:"Game Theory Optimal : stratégie théoriquement équilibrée, impossible à exploiter, calculée par des solveurs. Les ranges de cette appli sont des guides simplifiés, pas du GTO exact."},
+  {term:'Equity', def:"La part du pot que ta main gagnerait en moyenne si la main allait jusqu'au bout, exprimée en pourcentage."},
+  {term:'Outs', def:"Les cartes restantes dans le deck qui amélioreraient ta main pour la rendre probablement gagnante."},
+  {term:'Cote du pot (pot odds)', def:"Le rapport entre ce que tu dois miser pour suivre et la taille totale du pot. Sert à savoir si un call est rentable sur la durée."},
+  {term:'Implied odds', def:"Les gains futurs espérés (aux tours suivants) si tu complètes ta main, en plus du pot actuel. Rendent certains calls rentables même avec une cote insuffisante immédiate."},
+  {term:'Position', def:"Ton ordre de parole à une main. Être \"en position\" (parler après l'adversaire) donne un avantage informationnel important."},
+  {term:'Blinds (SB/BB)', def:"Petite Blinde et Grosse Blinde : mises obligatoires postées avant les cartes pour créer un pot initial."},
+  {term:'Range', def:"L'ensemble des mains qu'un joueur peut avoir dans une situation donnée, plutôt qu'une main précise."},
+  {term:'Nuts', def:"La meilleure main possible à un moment donné, compte tenu des cartes visibles."},
+  {term:'Kicker', def:"La carte qui départage deux mains de même rang (par exemple deux paires de rois avec un kicker différent)."},
+  {term:'Fold equity', def:"La valeur d'une mise qui vient de la probabilité que l'adversaire se couche, indépendamment de la force réelle de ta main."},
+  {term:'Semi-bluff', def:"Miser avec une main pas encore gagnante mais qui a des outs pour s'améliorer : deux façons de gagner le coup."},
+  {term:'Blocker', def:"Une carte dans ta main qui réduit le nombre de combinaisons fortes possibles chez l'adversaire."},
+  {term:'Multiway pot', def:"Un coup joué à trois joueurs ou plus (par opposition à un pot heads-up à deux joueurs)."},
+  {term:'Overpair', def:"Une paire de départ plus haute que toutes les cartes du board."},
+  {term:'Draw (tirage)', def:"Une main qui n'est pas encore faite mais qui peut devenir très forte avec la bonne carte (tirage couleur, tirage quinte...)."},
+  {term:'Board texture', def:"L'aspect du board : sec (peu de tirages) ou coordonné/mouillé (beaucoup de tirages couleur/quinte possibles)."},
+  {term:'ICM', def:"Independent Chip Model : modèle utilisé en tournoi pour évaluer la valeur réelle en argent de tes jetons selon la structure des gains."},
+  {term:'Tilt', def:"État émotionnel qui pousse un joueur à s'écarter de sa stratégie habituelle, souvent après une mauvaise main (bad beat)."},
+  {term:'Bad beat', def:"Perdre un coup alors qu'on était largement favori, à cause d'une carte improbable."},
+];
+
+/* ===================== MODULES (méta) ===================== */
+const MODULES = [
+  {key:'preflop', emoji:'🃏', title:'Mains de départ', desc:'Fold, call ou raise selon ta position'},
+  {key:'range', emoji:'🔢', title:'Range Trainer', desc:"Devine la grille d'ouverture par position"},
+  {key:'postflop', emoji:'🎯', title:'Post-flop', desc:'Check, bet, call ou fold selon le board'},
+  {key:'bluff', emoji:'🎭', title:'Le bluff', desc:'Reconnaître les bons spots pour bluffer'},
+  {key:'showdown', emoji:'🏆', title:'Qui gagne ?', desc:'Compare deux mains à l\'abattage'},
+  {key:'potodds', emoji:'📐', title:'Cotes & équité', desc:'Calcule si un call est rentable'},
+];
+
+/* ===================== STATE ===================== */
+let profile = null;
+let view = 'home';
+let quiz = null;
+let rangeState = null;
+
+/* ===================== STORAGE ===================== */
+const LOCAL_KEY = 'poker-training-profile';
+function defaultProfile(){ return { points:0, streak:0, longestStreak:0, log:[], lastDate:null }; }
+async function loadProfile(){
+  if(window.storage){
+    try{
+      const res = await window.storage.get('profile', false);
+      if(res && res.value) return {...defaultProfile(), ...JSON.parse(res.value)};
+      return defaultProfile();
+    }catch(e){}
+  }
+  try{
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if(raw) return {...defaultProfile(), ...JSON.parse(raw)};
+  }catch(e){}
+  return defaultProfile();
+}
+async function saveProfile(p){
+  if(window.storage){ try{ await window.storage.set('profile', JSON.stringify(p), false); return; }catch(e){} }
+  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(p)); }catch(e){}
+}
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysBetween(a,b){
+  const [ay,am,ad]=a.split('-').map(Number), [by,bm,bd]=b.split('-').map(Number);
+  return Math.round((new Date(by,bm-1,bd) - new Date(ay,am-1,ad))/86400000);
+}
+function recordSession(moduleTitle, correctCount, total){
+  const pts = correctCount*10 + Math.round((correctCount/total)*20);
+  const today = todayStr();
+  if(profile.lastDate !== today){
+    if(profile.lastDate && daysBetween(profile.lastDate,today)===1) profile.streak=(profile.streak||0)+1;
+    else profile.streak = 1;
+    profile.lastDate = today;
+    profile.longestStreak = Math.max(profile.longestStreak||0, profile.streak);
+  }
+  profile.points = (profile.points||0)+pts;
+  profile.log.push({date:today, label:`${moduleTitle} — ${correctCount}/${total}`, points:pts});
+  saveProfile(profile);
+  return pts;
+}
+
+/* ===================== NAVIGATION ===================== */
+function goHome(){ view='home'; renderHome(); }
+function goHistory(){ view='history'; renderHistory(); }
+function goGlossary(){ view='glossary'; renderGlossary(); }
+
+function startModule(key){
+  if(key==='range'){ view='range'; startRange(); return; }
+  let questions, title;
+  const n = 10;
+  if(key==='preflop'){ questions = generatePreflopQuestions(n); title='Mains de départ'; }
+  else if(key==='potodds'){ questions = generatePotOddsQuestions(n); title='Cotes & équité'; }
+  else if(key==='postflop'){ questions = shuffleSample(POSTFLOP_BANK, n).map(bankToQuestion); title='Post-flop'; }
+  else if(key==='bluff'){ questions = shuffleSample(BLUFF_BANK, n).map(bluffToQuestion); title='Le bluff'; }
+  else if(key==='showdown'){ questions = shuffleSample(SHOWDOWN_BANK, n).map(showdownToQuestion); title='Qui gagne ?'; }
+  quiz = {moduleKey:key, title, questions, index:0, correctCount:0, answered:false, selected:null};
+  view='quiz';
+  renderQuiz();
+}
+function shuffleSample(arr, n){
+  const copy = arr.slice();
+  for(let i=copy.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [copy[i],copy[j]]=[copy[j],copy[i]]; }
+  return copy.slice(0, Math.min(n, copy.length));
+}
+function bankToQuestion(item){
+  return { board:item.board, hand:item.hand, context:item.ctx, options:item.options, correct:item.correct, explain:item.explain };
+}
+function bluffToQuestion(item){
+  return { context:item.ctx+' '+item.q, options:item.options, correct:item.correct, explain:item.explain };
+}
+function showdownToQuestion(item){
+  return { showdown:{board:item.board, a:item.a, b:item.b}, context:"Le board est complet. Quelle main gagne ?", options:['Main A','Main B','Égalité (Tie)'],
+    correct: item.winner==='A'?'Main A':item.winner==='B'?'Main B':'Égalité (Tie)', explain:item.explain };
+}
+
+/* ===================== RENDER: HOME ===================== */
+function renderHome(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="header">
+      <div><div class="kicker">Poker Training</div><h1>Texas Hold'em</h1></div>
+      <div style="display:flex;gap:8px;">
+        <button class="icon-btn" onclick="goHistory()" title="Historique">📊</button>
+        <button class="icon-btn" onclick="goGlossary()" title="Glossaire">📖</button>
+      </div>
+    </div>
+    <div class="stats-card">
+      <div class="stat-block"><div class="flame">🔥 ${profile.streak||0}</div><div class="stat-sub">jours de suite</div></div>
+      <div class="stat-block"><div class="points">${profile.points||0}</div><div class="stat-sub">points</div></div>
+    </div>
+    <div class="section-title" style="margin-top:0;">Modules d'entraînement</div>
+    <div class="module-grid">
+      ${MODULES.map(m => `
+        <div class="module-card" onclick="startModule('${m.key}')">
+          <div class="emoji">${m.emoji}</div>
+          <div class="txt"><h3>${m.title}</h3><p>${m.desc}</p></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+/* ===================== RENDER: QUIZ GÉNÉRIQUE ===================== */
+function renderQuiz(){
+  const app = document.getElementById('app');
+  const q = quiz.questions[quiz.index];
+  let visualHtml = '';
+  if(q.showdown){
+    visualHtml = `
+      <div class="section-title" style="text-align:center;margin-top:0;">Board</div>
+      ${cardsRowHtml(q.showdown.board)}
+      <div class="vs-block">
+        <div><div class="vs-label" style="text-align:center;">Main A</div>${cardsRowHtml(q.showdown.a, true)}</div>
+        <div class="vs-label">VS</div>
+        <div><div class="vs-label" style="text-align:center;">Main B</div>${cardsRowHtml(q.showdown.b, true)}</div>
+      </div>
+    `;
+  } else if(q.board || q.hand){
+    if(q.board) visualHtml += `<div class="section-title" style="text-align:center;margin-top:0;">Board</div>${cardsRowHtml(q.board)}`;
+    if(q.hand) visualHtml += `<div class="section-title" style="text-align:center;">Ta main</div>${cardsRowHtml(q.hand)}`;
+  } else if(q.cards){
+    visualHtml = cardsRowHtml(q.cards);
+  }
+
+  app.innerHTML = `
+    <button class="back" onclick="goHome()">‹ Quitter</button>
+    <h1 style="margin-bottom:6px;">${quiz.title}</h1>
+    <div class="quiz-progress">Question ${quiz.index+1} / ${quiz.questions.length} · ${quiz.correctCount} correcte${quiz.correctCount>1?'s':''}</div>
+    ${visualHtml}
+    <div class="quiz-context">${q.context}</div>
+    <div id="optionsZone">
+      ${q.options.map(opt => `<button class="option-btn" id="opt-${cssSafe(opt)}" onclick="answerQuiz('${escAttr(opt)}')">${opt}</button>`).join('')}
+    </div>
+    <div id="explainZone"></div>
+  `;
+}
+function cssSafe(s){ return s.replace(/[^a-zA-Z0-9]/g,''); }
+function escAttr(s){ return String(s).replace(/'/g, "\\'"); }
+
+function answerQuiz(selected){
+  if(quiz.answered) return;
+  quiz.answered = true;
+  quiz.selected = selected;
+  const q = quiz.questions[quiz.index];
+  const isCorrect = selected === q.correct;
+  if(isCorrect) quiz.correctCount++;
+
+  q.options.forEach(opt => {
+    const el = document.getElementById('opt-'+cssSafe(opt));
+    if(!el) return;
+    el.onclick = null;
+    if(opt === q.correct) el.classList.add('correct');
+    else if(opt === selected) el.classList.add('incorrect');
+    else el.classList.add('dimmed');
+  });
+
+  document.getElementById('explainZone').innerHTML = `
+    <div class="explain-box"><b>${isCorrect ? 'Bien joué !' : 'Pas tout à fait.'}</b><br>${q.explain}</div>
+    <button class="btn btn-primary" style="margin-top:6px;" onclick="nextQuiz()">${quiz.index+1<quiz.questions.length?'Question suivante':'Voir le résultat'}</button>
+  `;
+}
+function nextQuiz(){
+  quiz.index++;
+  quiz.answered = false;
+  if(quiz.index >= quiz.questions.length){ finishQuiz(); return; }
+  renderQuiz();
+}
+function finishQuiz(){
+  const pts = recordSession(quiz.title, quiz.correctCount, quiz.questions.length);
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="result-wrap">
+      <h1>Session terminée</h1>
+      <p class="dim" style="margin-top:6px;">${quiz.title}</p>
+      <div class="big">${quiz.correctCount}/${quiz.questions.length}</div>
+      <p class="dim">+${pts} points</p>
+      <div class="btn-row" style="max-width:320px;margin-left:auto;margin-right:auto;">
+        <button class="btn btn-ghost" onclick="goHome()">Accueil</button>
+        <button class="btn btn-primary" onclick="startModule('${quiz.moduleKey}')">Rejouer</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ===================== RENDER: RANGE TRAINER ===================== */
+function startRange(){
+  const position = POSITIONS[Math.floor(Math.random()*POSITIONS.length)];
+  rangeState = { position, picked: new Set(), submitted:false };
+  renderRange();
+}
+function toggleRangeCell(label){
+  if(rangeState.submitted) return;
+  if(rangeState.picked.has(label)) rangeState.picked.delete(label);
+  else rangeState.picked.add(label);
+  renderRange();
+}
+function submitRange(){
+  rangeState.submitted = true;
+  const threshold = OPEN_THRESHOLD[rangeState.position];
+  let correct=0;
+  ALL_HANDS.forEach(h=>{
+    const shouldInclude = h.score >= threshold;
+    const included = rangeState.picked.has(h.label);
+    if(shouldInclude===included) correct++;
+  });
+  const pct = Math.round((correct/169)*100);
+  rangeState.accuracy = pct;
+  const pts = Math.round(pct/3);
+  const today = todayStr();
+  if(profile.lastDate !== today){
+    if(profile.lastDate && daysBetween(profile.lastDate,today)===1) profile.streak=(profile.streak||0)+1;
+    else profile.streak = 1;
+    profile.lastDate = today;
+    profile.longestStreak = Math.max(profile.longestStreak||0, profile.streak);
+  }
+  profile.points = (profile.points||0)+pts;
+  profile.log.push({date:today, label:`Range Trainer (${rangeState.position}) — ${pct}% précis`, points:pts});
+  saveProfile(profile);
+  rangeState.pts = pts;
+  renderRange();
+}
+function renderRange(){
+  const app = document.getElementById('app');
+  const threshold = OPEN_THRESHOLD[rangeState.position];
+  const gridHtml = RANKS.map((r1,i) => RANKS.map((r2,j) => {
+    let label, isPair=false;
+    if(i===j){ label=r1+r2; isPair=true; }
+    else if(i<j){ label=r1+r2+'s'; }
+    else { label=r2+r1+'o'; }
+    const picked = rangeState.picked.has(label);
+    let cls = 'range-cell'+(isPair?' pair':'')+(picked?' picked':'');
+    if(rangeState.submitted){
+      const h = ALL_HANDS.find(x=>x.label===label);
+      const should = h.score >= threshold;
+      if(should && picked) cls += ' correct-yes';
+      else if(!should && picked) cls += ' wrong-include';
+      else if(should && !picked) cls += ' wrong-exclude';
+    }
+    return `<div class="${cls}" onclick="toggleRangeCell('${label}')">${label}</div>`;
+  }).join('')).join('');
+
+  app.innerHTML = `
+    <button class="back" onclick="goHome()">‹ Quitter</button>
+    <h1>Range Trainer</h1>
+    <p class="tagline" style="margin-bottom:16px;">Coche toutes les mains que tu ouvrirais en <b style="color:var(--chalk);">${POSITION_NAMES[rangeState.position]}</b>, personne n'a encore parlé.</p>
+    <div class="range-grid">${gridHtml}</div>
+    ${rangeState.submitted
+      ? `<div class="explain-box"><b>Précision : ${rangeState.accuracy}%</b><br>Vert = bonne inclusion. Rouge plein = main incluse à tort. Contour rouge = main oubliée. +${rangeState.pts} points.</div>
+         <div class="btn-row"><button class="btn btn-ghost" onclick="goHome()">Accueil</button><button class="btn btn-primary" onclick="startRange()">Nouvelle position</button></div>`
+      : `<button class="btn btn-primary" onclick="submitRange()">Valider ma range</button>`
+    }
+  `;
+}
+
+/* ===================== RENDER: GLOSSAIRE ===================== */
+function renderGlossary(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <button class="back" onclick="goHome()">‹ Retour</button>
+    <div class="header"><div><div class="kicker">Aide-mémoire</div><h1>Glossaire</h1></div></div>
+    ${GLOSSARY.map(g => `<div class="glossary-row"><div class="term">${g.term}</div><div class="def">${g.def}</div></div>`).join('')}
+  `;
+}
+
+/* ===================== RENDER: HISTORIQUE ===================== */
+function renderHistory(){
+  const app = document.getElementById('app');
+  const byDate = {};
+  (profile.log||[]).slice().reverse().forEach(l => { (byDate[l.date]=byDate[l.date]||[]).push(l); });
+  const dateKeys = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  let body = '';
+  if(dateKeys.length===0){
+    body = `<div class="empty-history">Pas encore de session enregistrée.<br>Termine ton premier quiz pour commencer.</div>`;
+  } else {
+    dateKeys.forEach(key => {
+      body += `<div class="day-heading">${key}</div>`;
+      byDate[key].forEach(l => { body += `<div class="log-row"><span>${l.label}</span><span class="pts">+${l.points}</span></div>`; });
+    });
+  }
+  app.innerHTML = `
+    <button class="back" onclick="goHome()">‹ Retour</button>
+    <div class="header"><div><div class="kicker">Historique</div><h1>Ta progression</h1></div></div>
+    <p class="tagline" style="margin-bottom:20px;">🔥 ${profile.streak||0} jour${(profile.streak||0)>1?'s':''} de suite · record : ${profile.longestStreak||0}</p>
+    <div class="history-summary">
+      <div class="stat"><div class="n">${(profile.log||[]).length}</div><div class="l">sessions</div></div>
+      <div class="stat"><div class="n">${profile.points||0}</div><div class="l">points</div></div>
+    </div>
+    ${body}
+  `;
+}
+
+/* ===================== INIT ===================== */
+(async function init(){
+  profile = await loadProfile();
+  renderHome();
+})();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
