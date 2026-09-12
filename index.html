@@ -337,6 +337,19 @@ const MODULES = [
   {key:'tiers', emoji:'📶', title:'Force des mains', desc:'Haut, milieu ou bas de panier pour tes 2 cartes'},
 ];
 function tierOf(score){ return score>=9?'Haut':score>=6?'Milieu':'Bas'; }
+function generateTierQuestions(n){
+  const qs = [];
+  for(let i=0;i<n;i++){
+    const {hand, cards} = randomHandInstance();
+    const tier = tierOf(hand.score);
+    qs.push({
+      cards, context:"Cette main se situe dans quelle partie du panier (169 mains possibles) ?",
+      options:['Haut','Milieu','Bas'], correct:tier,
+      explain:`Score estimé : ${hand.score.toFixed(1)}/20. Haut = top ~15% (jouable presque partout), Milieu = jouable en bonne position, Bas = à coucher la plupart du temps.`
+    });
+  }
+  return qs;
+}
 
 /* ===================== STATE ===================== */
 let profile = null;
@@ -392,7 +405,10 @@ function goGlossary(){ view='glossary'; renderGlossary(); }
 
 function startModule(key){
   if(key==='range'){ view='range'; startRange(); return; }
-  if(key==='tiers'){ view='tiers'; renderTiers(); return; }
+  if(key==='tiers'){
+    quiz = {moduleKey:key, title:'Force des mains', questions:generateTierQuestions(10), index:0, correctCount:0, answered:false, selected:null};
+    view='quiz'; renderQuiz(); return;
+  }
   let questions, title;
   const n = 10;
   if(key==='preflop'){ questions = generatePreflopQuestions(n); title='Mains de départ'; }
@@ -444,6 +460,7 @@ function renderHome(){
         </div>
       `).join('')}
     </div>
+    <button class="see-history" onclick="renderTiers()" style="margin-top:10px;">Voir la grille de référence complète →</button>
   `;
 }
 
